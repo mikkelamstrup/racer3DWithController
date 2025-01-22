@@ -1,9 +1,9 @@
-# Racer2DWithController
+# Racer3DWithController
 
-**Racer2DWithController** er et projekt, der kombinerer Unity med en ekstern ESP32-mikrocontroller 
-for at skabe en interaktiv 2D-racerbil-simulator. 
+**Racer3DWithController** er et projekt, der kombinerer Unity med en ekstern ESP32-mikrocontroller 
+for at skabe en interaktiv 3D-racerbil-simulator. 
 Simulatoren giver brugeren mulighed for at styre en bil i Unity ved hjælp af potentiometer og knapper, 
-der er forbundet til ESP32.
+der er forbundet til ESP32, med realistisk fysik gennem **Wheel Colliders**.
 
 ---
 
@@ -16,10 +16,13 @@ Unity-script, der styrer bilens bevægelse i spillet.
 
 - **Funktionalitet:**
   - Styrer bilens fremadgående eller baglæns bevægelse.
-  - Håndterer bilens rotation baseret på brugerinput.
+  - Håndterer bilens styring baseret på brugerinput.
+  - Tilføjer realistisk acceleration, bremsning og styring med **Wheel Colliders**.
 - **Metoder:**
-  - `SetMoveInput(float input)`: Modtager input til fremadgående/baglæns bevægelse.
-  - `SetRotationInput(float input)`: Modtager input til bilens rotation.
+  - `SetInputs(float moveInput, float steeringInput)`: Modtager input til fremadgående/baglæns bevægelse og styring.
+  - `HandleMotor()`: Håndterer motorens kraft og bremsning.
+  - `HandleSteering()`: Håndterer bilens styringsvinkel.
+  - `UpdateWheels()`: Synkroniserer Wheel Colliders med de visuelle hjul.
 
 ### **2. SerialController.cs**
 Unity-script, der håndterer seriel kommunikation mellem Unity og ESP32.
@@ -28,7 +31,7 @@ Unity-script, der håndterer seriel kommunikation mellem Unity og ESP32.
   - Modtager data fra ESP32 via den serielle port.
   - Behandler data og oversætter dem til input til bilen i Unity.
 - **Konfigurationsparametre:**
-  - `portName`: Portnavn for den serielle forbindelse (f.eks. `/dev/cu.usbserial-0001` på mac eller `COM3` på windows).
+  - `portName`: Portnavn for den serielle forbindelse (f.eks. `/dev/cu.usbserial-0001` på Mac eller `COM3` på Windows).
   - `baudRate`: Baudrate for den serielle forbindelse (skal matche ESP32's firmware).
 
 ### **3. controller.cpp**
@@ -55,13 +58,22 @@ Arduino-skript (firmware) til ESP32, der indsamler data fra sensorer og sender d
 
 1. **ESP32 Firmware:**
    - Upload `controller.cpp` til ESP32 ved hjælp af Arduino IDE.
-   - Sørg for at tilpasse `potPin`, `forwardButton`, og `backwardButton` til din hardwareopsætning.
+   - Sørg for at tilpasse `potPin`, `forwardButton` og `backwardButton` til din hardwareopsætning.
    - Juster portindstillinger og baudrate i Arduino IDE, så de matcher dit setup.
 
 2. **Unity Projekt:**
    - Tilføj `CarController.cs` og `SerialController.cs` til et GameObject i Unity.
    - Konfigurer `SerialController` til at bruge den korrekte port (`portName`) og baudrate (`baudRate`).
    - Link `SerialController` til en instans af `CarController`.
+
+3. **Bilopsætning:**
+   - Tilføj en bilmodel til Unity.
+   - Tilføj en **Rigidbody** til bilens hovedobjekt.
+   - Tilføj 4 **Wheel Colliders** og tilknyt dem til hjulene.
+   - Juster parametrene for Wheel Colliders:
+     - **Radius:** Tilpas efter hjulenes størrelse.
+     - **Spring og Damper:** Sørg for realistisk affjedring.
+     - **Friction:** Indstil passende friktion for realistisk kørsel.
 
 ---
 
@@ -85,13 +97,16 @@ Arduino-skript (firmware) til ESP32, der indsamler data fra sensorer og sender d
   - Sørg for, at ESP32 sender data i det forventede format: `potValue,forward,backward`.
   - Kontrollér, at forbindelsen mellem `SerialController` og `CarController` er korrekt opsat.
 
+- **Urealistisk fysik:**
+  - Juster Wheel Colliders' parametre som motorstyrke, bremsekraft og friktion for at opnå bedre resultater.
+
 ---
 
 ## Fremtidige Forbedringer
 
 - Tilføj support til flere input-enheder.
 - Implementer trådløs kommunikation (via Bluetooth eller Wi-Fi).
-- Udvid simulatoren med baner.
+- Udvid simulatoren med komplekse baner og AI-modstandere.
 
 ---
 
@@ -104,3 +119,4 @@ Bidrag er velkomne! Fork projektet, lav ændringer og send en pull request.
 ## Licens
 
 Dette projekt er under [MIT-licensen](https://opensource.org/licenses/MIT).
+
